@@ -1,0 +1,15 @@
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\GameCharacterTab.csproj.AssemblyReference.cache
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\GameCharacterTab.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\GameCharacterTab.AssemblyInfoInputs.cache
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\GameCharacterTab.AssemblyInfo.cs
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\GameCharacterTab.csproj.CoreCompileInputs.cache
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\bin\Debug\net6.0\GameCharacterTab.exe
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\bin\Debug\net6.0\GameCharacterTab.deps.json
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\bin\Debug\net6.0\GameCharacterTab.runtimeconfig.json
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\bin\Debug\net6.0\GameCharacterTab.dll
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\bin\Debug\net6.0\GameCharacterTab.pdb
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\GameCharacterTab.dll
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\refint\GameCharacterTab.dll
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\GameCharacterTab.pdb
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\GameCharacterTab.genruntimeconfig.cache
+C:\Users\prdb\Desktop\IsayProjects\GameCharacterTab\obj\Debug\net6.0\ref\GameCharacterTab.dll
