@@ -4,57 +4,91 @@ class Program
 {
     static void Main()
     {
+        List<Game> characters = new List<Game>();
         List<Game> alive = new List<Game>();
         List<Game> dead = new List<Game>();
 
-        void accountChoshing(Game[] gamers, int quantity, List<Game> alive, List<Game> dead) //Метод для выбора из массива объекта для применения метода
+        //Console.WriteLine("Добро пожаловать в Игру..");
+        Console.WriteLine("\nСоздайте игроков для первой команды");
+        string answer = "";
+        while (answer != "нет")
         {
-            int nom = -1;
-            Console.WriteLine("\nНеобходимо выбрать персонажа чтобы продолжить.");
-            while (nom > gamers.Length || nom < 0)
-            {
-                Console.WriteLine($"Введите один из доступных номеров персонажей:\n\nот 1 до {quantity}:\n");
-                nom = Convert.ToInt32(Console.ReadLine()); //Выбор индекса элемента массива
-                if (nom > 0)
-                {
-                    if (nom <= gamers.Length)
-                    {
-                        gamers[nom - 1].trueGaming(gamers, alive, dead);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ошибка. Введите значение в заданом диапазоне.\n");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Ошибка. Введите значение в заданом диапазоне.\n");
-                }
-            }
-        }
+            Game character = new Game();
+            character.charCreation(characters, alive, dead, true);
+            characters.Add(character);
 
-        Console.WriteLine("Чтобы начать игру, необходимо задать количество персонажей.\nВНИМАНИЕ: Чтобы игра закончилась естественно, необходимо победить всех созданных персонажей, а чтобы победить их - нужно их создать.\nСоздайте столько персонажей, сколько заявите.\n\nВведите количество персонажей, которое хотите создать:");
-        int quantityOfCharacters = Convert.ToInt32(Console.ReadLine());
-        Game[] accountsGamers = new Game[quantityOfCharacters];
-        for (int i = 0; i < accountsGamers.Length; i++) //Цикл для создания элементов массива
-        {
-            accountsGamers[i] = new Game();
-        }
-
-        accountChoshing(accountsGamers, quantityOfCharacters, alive, dead); //Первое обращение к методу        
-
-        Console.WriteLine("\nЧтобы вернуться к выбору персонажа, нажмите \"Enter\".\nЧтобы выйти из программы напишите что-нибудь и нажмите \"Enter\".\n");
-        string thisAccount = ""; //Переменная для поддержания работы следующего цикла
-        thisAccount = Console.ReadLine();
-
-        if (thisAccount == "")
-        {
             do
             {
-                accountChoshing(accountsGamers, quantityOfCharacters, alive, dead);
-                Console.WriteLine("\nЧтобы вернуться к выбору персонажа, нажмите \"Enter\".\nЧтобы выйти из программы, напишите что-нибудь и нажмите \"Enter\".\n");
-                thisAccount = Console.ReadLine();
-            } while (thisAccount == ""); //Метод работает пока строка пуста
+                Console.WriteLine("Продолжить? (да/нет)");
+                answer = Console.ReadLine();
+                switch (answer)
+                {
+                    case "да":
+                    case "нет":
+                        break;
+                    default:
+                        answer = "";
+                        break;
+                }
+            } while (answer != "да" && answer != "нет");
         }
+
+        Console.WriteLine("\nСоздайте игроков для второй команды");
+        answer = "";
+        while (answer != "нет")
+        {
+            Game character = new Game();
+            character.charCreation(characters, alive, dead, false);
+            characters.Add(character);
+
+            do
+            {
+                Console.WriteLine("Продолжить? (да/нет)");
+                answer = Console.ReadLine();
+                switch (answer)
+                {
+                    case "да":
+                    case "нет":
+                        break;
+                    default:
+                        answer = "";
+                        break;
+                }
+            } while (answer != "да" && answer != "нет");
+        }
+
+        Console.WriteLine("Создание персонажей завершено.\nВыберите команду, за которую хотите играть:\nКоманда 1 - 1\nКоманда 2 - 2");
+
+        do
+        {
+            Console.WriteLine("\nВыберите команду, за которую хотите играть:\nКоманда 1 - 1\nКоманда 2 - 2");
+            answer = Console.ReadLine();
+            switch (answer)
+            {
+                case "1":
+                case "2":
+                    break;
+                default:
+                    answer = "";
+                    break;
+            }
+        } while (answer != "1" && answer != "2");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
     }
 }

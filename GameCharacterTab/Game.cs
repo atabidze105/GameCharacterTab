@@ -34,7 +34,7 @@ namespace GameCharacterTab
             _healCharge = 0;
             _omen = 0;
             Random random = new Random();
-            _strength = random.Next((_maxHP/2), (_maxHP/3)*2);
+            _strength = random.Next((_maxHP/2), Convert.ToInt32(Math.Ceiling(Convert.ToDouble(_maxHP)/3)*2));
             Console.WriteLine("\nСоздание персонажа завершено.\n");
         }
 
@@ -145,18 +145,59 @@ namespace GameCharacterTab
             {
                 Console.WriteLine("\nБитва начинается!\n");
 
-                do
+                while (_healpoints > 0 && opponents.Count > 0)
                 {
                     foreach (Game opponent in opponents)
                     {
-                        while (opponent._healpoints > 0)
+                        //Здесь начинается сражение двух персонажей - применившего метод и объекта из списка врагов
+                        if (_healpoints > 0)
                         {
-                            fight(opponent, alive, dead);
-                        }
+                            while (_healpoints > 0 && opponent._healpoints > 0)
+                            {
+                                Console.WriteLine($"Игроки {_name} и {opponent._name} обмениваются ударами!\n");
+                                _healpoints -= opponent._strength;
+                                opponent._healpoints -= separatedDamage;
+                            }
+                            if (_healpoints <= 0 && opponent._healpoints <= 0)
+                            {
+                                Console.WriteLine($"Игроки {_name} и {opponent._name} убили друг друга!\n");
+                                death(alive, dead);
+                                _killCharge++;
+                                _killScore++;
+                                _healCharge++;
+                                opponent.death(alive, dead);
+                                opponent._killCharge++;
+                                opponent._healCharge++;
+                                opponent._killScore++;
+                            }
+                            else
+                            {
+                                if (opponent._healpoints <= 0)
+                                {
+                                    Console.WriteLine($"Игрок {_name} убил игрока {opponent._name}!\n");
+                                    opponent.death(alive, dead);
+                                    _killCharge++;
+                                    _killScore++;
+                                    _healCharge++;
+                                }
+                                else
+                                {
+                                    if (_healpoints <= 0)
+                                    {
+                                        Console.WriteLine($"Игрок {opponent._name} убил игрока {_name}!\n");
+                                        death(alive, dead);
+                                        opponent._killCharge++;
+                                        opponent._killScore++;
+                                        opponent._healCharge++;
+                                    }
 
-                        if (opponent._healpoints <= 0)
-                        {
-                            opponent._omen = 1;
+                                }
+                            }
+
+                            if (opponent._healpoints <= 0)
+                            {
+                                opponent._omen = 1;
+                            }
                         }
                     }
 
@@ -168,7 +209,7 @@ namespace GameCharacterTab
                         }
                     }
 
-                } while (_healpoints > 0 && opponents.Count != 0);
+                }
 
                 Console.WriteLine("\nБитва окончена.");
 
@@ -231,7 +272,7 @@ namespace GameCharacterTab
         {
             if (gamer != null)
             {
-                if (gamer._friend == _friend || alive.Contains(gamer) == true || gamer != this || _healCharge <= 5)
+                if (gamer._friend == _friend && gamer._healpoints < gamer._maxHP && alive.Contains(gamer) == true && gamer != this && _healCharge <= 5)
                 {
                     gamer._healpoints = _maxHP;
                     _healCharge -= 5;
@@ -287,7 +328,7 @@ namespace GameCharacterTab
            _locationY = y;
         }
 
-        private Game searchingByXY(Game[] characters, int X, int Y) //Поиск персонажа по его местоположению
+        private Game searchingByXY(List<Game> characters, int X, int Y) //Поиск персонажа по его местоположению
         {
             foreach (Game gamer in characters) //Перебор объектов в массиве
             {
@@ -299,7 +340,7 @@ namespace GameCharacterTab
             return null;    //Если объект не был найден, вернется пустое значение
         }
 
-        private Game searchingByName(Game[] gamers, string name)
+        private Game searchingByName(List<Game> gamers, string name)
         {
             foreach (Game gamer in gamers)
             {
@@ -311,9 +352,10 @@ namespace GameCharacterTab
             return null;          
         }
 
-        private void Gaming(Game[] gamers, List<Game> alive, List<Game> dead)
+        //private void characterChosing
+
+        public void charCreation(List<Game> gamers, List<Game> alive, List<Game> dead, bool team) //Создание персонажа
         {
-            win(alive, dead);
             while (_name == "" || _friend == null || _locationX == null || _locationY == null || _maxHP <= 0)
             {
                 Console.WriteLine("Необходимо создать персонажа, чтобы продолжить.\nВведите имя (должно быть уникальным):");
@@ -324,20 +366,7 @@ namespace GameCharacterTab
                 int XChar = Convert.ToInt32(Console.ReadLine());
                 Console.WriteLine("Введите Y:");
                 int YChar = Convert.ToInt32(Console.ReadLine());
-                Console.WriteLine("Выберите принадлежность к лагерю.\nЛагерь 1 - 1\nЛагерь 2 - 2");
-                string campChar = Console.ReadLine();
-                switch (campChar)
-                {
-                    case "1":
-                        _friend = true;
-                        break;
-                    case "2":
-                        _friend = false;
-                        break;
-                    default:
-                        _friend = null;
-                        break;
-                }
+
                 foreach (Game gamer in gamers)
                 {
                     if (nameChar == gamer._name)
@@ -346,40 +375,35 @@ namespace GameCharacterTab
                     }
                 }
 
-                if (searchingByXY(gamers, XChar, YChar) != null)
+                if (hpChar <= 0 || nameChar == "" || nameChar == null)
                 {
-                    if (searchingByXY(gamers, XChar, YChar)._friend != _friend)
-                    {
-                        Console.WriteLine("Введенные координаты занял враг. Разместите своего персонажа в другом месте.\n");
-                    }
-                    else
-                    {
-                        if (hpChar <= 0 || _friend == null || nameChar == "" || nameChar == null)
-                        {
-                            Console.WriteLine("Какие-то из значений введены некорректно. Попробуйте снова.\n");
-                        }
-                        else
-                        {
-                            newCharacter(nameChar, XChar, YChar, _friend, hpChar);
-                            alive.Add(this);
-                        }
-                    }
+                    Console.WriteLine("Какие-то из значений введены некорректно. Попробуйте снова.\n");
                 }
                 else
                 {
-                    if (hpChar <= 0 || _friend == null || nameChar == "" || nameChar == null)
+                    if (searchingByXY(gamers, XChar, YChar) != null)
                     {
-                        Console.WriteLine("Какие-то из значений введены некорректно. Попробуйте снова.\n");
+                        if (searchingByXY(gamers, XChar, YChar)._friend != team)
+                        {
+                            Console.WriteLine("Введенные координаты занял враг. Разместите своего персонажа в другом месте.\n");
+                        }
+                        else
+                        {
+                            newCharacter(nameChar, XChar, YChar, team, hpChar);
+                            alive.Add(this);
+                        }
                     }
                     else
                     {
-                        newCharacter(nameChar, XChar, YChar, _friend, hpChar);
+                        newCharacter(nameChar, XChar, YChar, team, hpChar);
                         alive.Add(this);
                     }
                 }
             }
-
-            
+        }
+        
+        public void Gaming(List<Game> gamers, List<Game> alive, List<Game> dead)
+        {
             Console.WriteLine($"Меню персонажа {_name}.\nВыберите действия:\n\n");
             string continuation  = "";
             
@@ -463,7 +487,7 @@ namespace GameCharacterTab
         }
     
         
-        public void trueGaming(Game[] gamers, List<Game> alive, List<Game> dead)
+        public void trueGaming(List<Game> gamers, List<Game> alive, List<Game> dead)
         {
             switch (_end)
             {
