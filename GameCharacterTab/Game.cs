@@ -412,7 +412,7 @@ namespace GameCharacterTab
 
         public void Gaming(List<Game> gamers, List<Game> alive, List<Game> dead)
         {
-            Console.WriteLine($"Меню персонажа {_name}.\nВыберите действия:\n\n");
+            Console.WriteLine($"\nМеню персонажа {_name}.\nВыберите действия:\n");
             string continuation = "";
 
             do

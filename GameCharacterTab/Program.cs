@@ -8,8 +8,28 @@ class Program
         List<Game> alive = new();
         List<Game> dead = new();
 
-        //Console.WriteLine("Добро пожаловать в Игру..");
-        Console.WriteLine("\nСоздайте игроков для первой команды");
+        void gameUsing(List<Game> chars)
+        {
+            string numb = "";
+
+            while (numb == "")
+            {
+                Console.WriteLine("\nВведите номер персонажа, за которого хотите играть:\n");
+                numb = Console.ReadLine();
+                if (Convert.ToInt32(numb) > 0 && Convert.ToInt32(numb) <= characters.Count())
+                {
+                    characters[Convert.ToInt32(numb) - 1].Gaming(characters, alive, dead);
+                }
+                else
+                {
+                    Console.WriteLine("\nВыбран несуществующий номер персонажа.\n");
+                    numb = "";
+                }
+            }
+        }
+
+        Console.WriteLine("Добро пожаловать в Игру..");
+        Console.WriteLine("Создайте игроков для первой команды");
         string answer = "";
         while (answer != "нет")
         {
@@ -19,7 +39,7 @@ class Program
 
             do
             {
-                Console.WriteLine("Продолжить? (да/нет)");
+                Console.WriteLine("\nПродолжить? (да/нет)\n");
                 answer = Console.ReadLine();
                 switch (answer)
                 {
@@ -43,7 +63,7 @@ class Program
 
             do
             {
-                Console.WriteLine("Продолжить? (да/нет)");
+                Console.WriteLine("\nПродолжить? (да/нет)\n");
                 answer = Console.ReadLine();
                 switch (answer)
                 {
@@ -57,7 +77,7 @@ class Program
             } while (answer != "да" && answer != "нет");
         }
 
-        Console.WriteLine("Создание персонажей завершено.\nВыберите персонажа, за которого хотите играть:");
+        Console.WriteLine("Создание персонажей завершено.\nВыберите персонажа, за которого хотите играть:\n");
 
         int i = 1;
         foreach (Game gamer in characters)
@@ -73,7 +93,7 @@ class Program
             }
             if (alive.Contains(gamer) == true)
             {
-                Console.Write( " - жив\n");
+                Console.Write(" - жив\n");
             }
             else
             {
@@ -82,75 +102,47 @@ class Program
             i++;
         }
 
-        Console.WriteLine("\nВведите номер персонажа, за которого хотите играть:");
-        
-        
-        string numb = "";
-        numb = Console.ReadLine();
-        if (Convert.ToInt32(numb) > 0 && Convert.ToInt32(numb) < characters.Count())
+        string answ = "";
+        while (answ != "нет")
         {
-            characters[Convert.ToInt32(numb)-1].Gaming(characters, alive, dead);
+            gameUsing(characters);
+            do
+            {                
+                Console.WriteLine("\nВернуться к выбору персонажа? (да/нет)\n");
+                answ = Console.ReadLine();
+                switch (answ)
+                {
+                    case "да":
+                        int j = 1;
+                        foreach (Game gamer in characters)
+                        {
+                            Console.Write($"{j}. {gamer.Name} - ");
+                            if (gamer.Team == true)
+                            {
+                                Console.Write("команда 1");
+                            }
+                            else
+                            {
+                                Console.Write("команда 2");
+                            }
+                            if (alive.Contains(gamer) == true)
+                            {
+                                Console.Write(" - жив\n");
+                            }
+                            else
+                            {
+                                Console.Write(" - мертв\n");
+                            }
+                            j++;
+                        }
+                        break;
+                    case "нет":
+                        break;
+                    default:
+                        answ = "";
+                        break;
+                }
+            } while (answ != "да" && answ != "нет");
         }
-        else
-        {
-            Console.WriteLine("Выбран несуществующий номер персонажа.");
-        }
-
-        //while (numb == "")
-        //{
-        //    numb = Console.ReadLine();
-        //    foreach (Game character in characters)
-        //    {
-        //        try
-        //        {
-        //            if (Convert.ToInt32(numb) > 0 && Convert.ToInt32(numb) < characters.Count())
-        //            {
-        //                characters[Convert.ToInt32(numb)].Gaming(characters,alive,dead);
-        //            }
-        //            else
-        //            {
-        //                Console.WriteLine("Выбран несуществующий номер персонажа.");
-        //            }
-        //        }
-        //        catch
-        //        {
-        //            numb = "";
-        //        }
-        //    }
-        //}
-
-        //do
-        //{
-        //    Console.WriteLine("\nВыберите команду, за которую хотите играть:\nКоманда 1 - 1\nКоманда 2 - 2");
-        //    answer = Console.ReadLine();
-        //    switch (answer)
-        //    {
-        //        case "1":
-        //        case "2":
-        //            break;
-        //        default:
-        //            answer = "";
-        //            break;
-        //    }
-        //} while (answer != "1" && answer != "2");
-
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }
