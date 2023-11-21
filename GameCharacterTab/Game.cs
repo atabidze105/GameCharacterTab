@@ -4,27 +4,19 @@ namespace GameCharacterTab
 {
     internal class Game
     {
-        private string _name;
-        private int _locationX;
-        private int _locationY;
-        private bool? _friend;
-        private int _healpoints;
-        private int _maxHP;
-        private int _heal;
-        private int _strength;
-        private int _killCharge;
-        private int _killScore;
-        private int _healCharge;
-        private int _omen;
-        private int _end;
-        public string Name
-        {
-            get { return _name; }
-        }
-        public bool? Team
-        {
-            get { return _friend; }
-        }
+        private string _name; //Имя персонажа
+        private int _locationX; //Координата X
+        private int _locationY; //Координата Y
+        private bool? _friend; //Принадлежность к лагерю
+        private int _healpoints; //Кол-во ОЗ (очков здоровья)
+        private int _maxHP; //Макс. кол-во ОЗ
+        private int _heal; //Получаемое лечение
+        private int _strength; //Сила (урон)
+        private int _killCharge; //Заряд для ультимативной способности
+        private int _killScore; //Кол-во убийств
+        private int _healCharge; //Заряд для полного исцеления
+        private int _omen; //Для удаления объектов из списка врагов
+        private int _end; //Для завершения игры
 
         public void newCharacter(string name, int locX, int locY, bool? friend, int health) //Создание персонажа
         {
@@ -46,11 +38,11 @@ namespace GameCharacterTab
             Console.WriteLine($"\nИмя персонажа: {_name}.\nМестоположение: X:{_locationX}; Y:{_locationY}.\nКоличество ОЗ: {_healpoints}/{_maxHP}.\nСила: {_strength}.\nВрагов побеждено: {_killScore}.");
             if (_friend == true)
             {
-                Console.WriteLine("Член дружественного лагеря.\n");
+                Console.WriteLine("Член команды 1.\n");
             }
             else
             {
-                Console.WriteLine("Член вражеского лагеря.\n");
+                Console.WriteLine("Член команды 2.\n");
             }
         }
 
@@ -58,7 +50,7 @@ namespace GameCharacterTab
         private void battle(List<Game> opponents, List<Game> alive, List<Game> dead) //Большая битва
         {
             int partyDamage = 0;
-            int separatedDamage = _strength / opponents.Count; //поделенный урон не используется в битве, исправить
+            int separatedDamage = _strength / opponents.Count; 
             if (opponents.Count > 1)
             {
                 Console.WriteLine("\nОбнаружены враги!\n\nВаши противники: ");
@@ -77,7 +69,7 @@ namespace GameCharacterTab
 
             string answer = "";
 
-            if (_killCharge >= 2)
+            if (_killCharge >= 5)
             {
                 Console.WriteLine("\nВозможно использование ультимативной способности.");
                 while (answer == "")
@@ -215,7 +207,7 @@ namespace GameCharacterTab
             Console.WriteLine("Использована ультимативная способность.\nПоверженные враги:");
             foreach (Game opponent in opponents)
             {
-                _killCharge -= 2;
+                _killCharge -= 5;
                 opponent._healpoints = 0;
                 opponent.death(alive, dead);
                 Console.WriteLine(opponent._name);
@@ -228,10 +220,10 @@ namespace GameCharacterTab
         {
             if (gamer != null)
             {
-                if (gamer._friend == _friend && gamer._healpoints < gamer._maxHP && alive.Contains(gamer) == true && gamer != this && _healCharge <= 5)
+                if (gamer._friend == _friend && gamer._healpoints < gamer._maxHP && alive.Contains(gamer) == true && gamer != this && _healCharge <= 3)
                 {
                     gamer._healpoints = _maxHP;
-                    _healCharge -= 5;
+                    _healCharge -= 3;
                     Console.WriteLine($"\nИгрок {gamer._name} полностью исцелен.");
                 }
                 else
@@ -308,9 +300,7 @@ namespace GameCharacterTab
             return null;
         }
 
-        //private void characterChosing
-
-        public void charCreation(List<Game> gamers, List<Game> alive, List<Game> dead, bool team) //Создание персонажа
+        public void charCreation(List<Game> gamers, List<Game> alive, bool team) //Создание персонажа
         {
             while (_name == "" || _friend == null || _locationX == null || _locationY == null || _maxHP <= 0)
             {
@@ -328,6 +318,7 @@ namespace GameCharacterTab
                     if (nameChar == gamer._name)
                     {
                         nameChar = "";
+                        Console.WriteLine("Персонаж с таким именем уже существует.");
                     }
                 }
 
@@ -355,6 +346,133 @@ namespace GameCharacterTab
                         alive.Add(this);
                     }
                 }
+            }
+        }
+
+        //private void gameUsing(List<Game> characters, List<Game> alive, List<Game> dead) //Метод для выбора персонажа по номеру
+        //{
+        //    string numb = "";
+
+        //    while (numb == "")
+        //    {
+        //        Console.WriteLine("\nВведите номер персонажа:\n");
+        //        numb = Console.ReadLine();
+        //        if (Convert.ToInt32(numb) > 0 && Convert.ToInt32(numb) <= characters.Count())
+        //        {
+        //            characters[Convert.ToInt32(numb) - 1].Gaming(characters, alive, dead);
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine("\nВыбран несуществующий номер персонажа.\n");
+        //            numb = "";
+        //        }
+        //    }
+        //}
+
+        private void teamBuild(List<Game> characters, List<Game> alive, bool team)
+        {
+            Console.Write("Создайте игроков для ");
+            if (team == true) 
+            {
+                Console.Write("первой команды\n");
+            }
+            else
+            {
+                Console.Write("второй команды\n");
+            }
+
+            string answer = "";
+            while (answer != "нет")
+            {
+                Game character = new Game();
+                character.charCreation(characters, alive, team);
+                characters.Add(character);
+
+                do
+                {
+                    Console.WriteLine("\nПродолжить? (да/нет)\n");
+                    answer = Console.ReadLine();
+                    switch (answer)
+                    {
+                        case "да":
+                        case "нет":
+                            break;
+                        default:
+                            answer = "";
+                            break;
+                    }
+                } while (answer != "да" && answer != "нет");
+            }
+        }
+
+        private void charList(List<Game> characters, List<Game> alive)
+        {
+            int i = 1;
+            foreach (Game gamer in characters)
+            {
+                Console.Write($"{i}. {gamer._name} - ");
+                if (gamer._friend == true)
+                {
+                    Console.Write("команда 1");
+                }
+                else
+                {
+                    Console.Write("команда 2");
+                }
+                if (alive.Contains(gamer) == true)
+                {
+                    Console.Write(" - жив\n");
+                }
+                else
+                {
+                    Console.Write(" - мертв\n");
+                }
+                i++;
+            }
+        }
+
+        public void GAME(List<Game> gamers, List<Game> alive, List<Game> dead)
+        {
+            Console.WriteLine("Добро пожаловать в Игру.\nПРАВИЛА:\nУничтожьте всех членов вражеской команды до того, как они уничтожат вас. Поддерживайте союзников лечением, группируйтесь в отряды и устраивайте засады.\nПолное исцеление: 3 очка;\nУльтимативная способность: 5 очков\n");
+            teamBuild(gamers, alive, true); //Создание персонажей 1 команды
+            teamBuild(gamers, alive, false);//Создание персонажей 2 команды
+            Console.WriteLine("Создание персонажей завершено.\nВыберите персонажа, за которого хотите играть:\n");
+            charList(gamers, alive);//Вывод списка персонажей
+            string answ = "";
+            while (answ != "нет")
+            {
+                string numb = "";
+
+                while (numb == "")
+                {
+                    Console.WriteLine("\nВведите номер персонажа:\n");
+                    numb = Console.ReadLine();
+                    if (Convert.ToInt32(numb) > 0 && Convert.ToInt32(numb) <= gamers.Count())
+                    {
+                        gamers[Convert.ToInt32(numb) - 1].Gaming(gamers, alive, dead);
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nВыбран несуществующий номер персонажа.\n");
+                        numb = "";
+                    }
+                }
+                do
+                {
+                    Console.WriteLine("\nВернуться к выбору персонажа? (да/нет)\n");
+                    answ = Console.ReadLine();
+                    switch (answ)
+                    {
+                        case "да":
+                            charList(gamers, alive);
+                            break;
+                        case "нет":
+                            break;
+                        default:
+                            answ = "";
+                            break;
+                    }
+                } while (answ != "да" && answ != "нет");
             }
         }
 
