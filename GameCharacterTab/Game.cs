@@ -15,8 +15,8 @@ namespace GameCharacterTab
         private int _killCharge; //Заряд для ультимативной способности
         private int _killScore; //Кол-во убийств
         private int _healCharge; //Заряд для полного исцеления
-        private int _omen; //Для удаления объектов из списка врагов
-        private int _end; //Для завершения игры
+        private int _omen; //метка для удаления объектов из списка врагов
+        private int _end; //метка для завершения игры
 
         public void newCharacter(string name, int locX, int locY, bool? friend, int health) //Создание персонажа
         {
@@ -29,7 +29,7 @@ namespace GameCharacterTab
             _healCharge = 0;
             _omen = 0;
             Random random = new Random();
-            _strength = random.Next((_maxHP / 2), Convert.ToInt32(Math.Ceiling(Convert.ToDouble(_maxHP) / 3) * 2));
+            _strength = random.Next(_maxHP / 2, _maxHP);
             Console.WriteLine("\nСоздание персонажа завершено.\n");
         }
 
@@ -47,7 +47,7 @@ namespace GameCharacterTab
         }
 
 
-        private void battle(List<Game> opponents, List<Game> alive, List<Game> dead) //Большая битва
+        private void battle(List<Game> opponents, List<Game> alive) //Большая битва
         {
             int partyDamage = 0;
             int separatedDamage = _strength / opponents.Count; //Урон игрока делится на кол-во противников
@@ -55,7 +55,7 @@ namespace GameCharacterTab
             {
                 Console.WriteLine("\nОбнаружены враги!\n\nВаши противники: ");
 
-                foreach (Game opponent in opponents) //Добавление объектов в список врагов
+                foreach (Game opponent in opponents) //Вывод списка противников
                 {
                     Console.WriteLine($"{opponent._name}");
                     partyDamage += opponent._strength; //общий урон отряда противников
@@ -65,11 +65,15 @@ namespace GameCharacterTab
             else
             {
                 Console.WriteLine("\nОбнаружен враг!");
+                foreach (Game opponent in opponents)
+                {
+                    partyDamage += opponent._strength; //общий урон отряда противников
+                }
             }
 
             string answer = "";
 
-            if (_killCharge >= 5)
+            if (_killCharge >= 5)//Если до этой битвы убито 5 противников, появляется возможность примненить ульту
             {
                 Console.WriteLine("\nВозможно использование ультимативной способности.");
                 while (answer == "")
@@ -79,7 +83,7 @@ namespace GameCharacterTab
                     switch (answer)
                     {
                         case "да":
-                            ultimate(opponents, alive, dead);
+                            ultimate(opponents, alive);
                             Console.WriteLine("Битва окончена.");
                             break;
                         case "нет":
@@ -95,75 +99,64 @@ namespace GameCharacterTab
             {
                 Console.WriteLine("\nБитва начинается!\n");
 
-                while (_healpoints > 0 && opponents.Count > 0)
+                while (_healpoints > 0 && opponents.Count > 0) //Битва идет пока мы живы и противники есть
                 {
-                    foreach (Game opponent in opponents)
+                    if (opponents.Count > 1) //Если враг был или остается один, то выводится его имя. Иначе пишет что нас бьет отряд
                     {
-                        //Здесь начинается сражение двух персонажей - применившего метод и объекта из списка врагов
-                        if (_healpoints > 0)
+                        Console.WriteLine("Отряд врагов наносит удар!\n");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{opponents[0]._name} наносит удар!\n");                        
+                    }
+
+                    _healpoints -= partyDamage; //Враги первыми наносят урон
+
+                    if (_healpoints > 0) //Если после удара у игрока еще остались ОЗ, то игрок наносит урон всему отряду противников
+                    {
+                        Console.WriteLine($"{_name} наносит ответный удар!\n");
+
+                        foreach (Game opponent in opponents) //Мы бьем каждого из списка врагов
                         {
-                            while (_healpoints > 0 && opponent._healpoints > 0)
+                            opponent._healpoints -= separatedDamage;
+                            if (opponent._healpoints <= 0) //проверка на наличие мертвых врагов
                             {
-                                Console.WriteLine($"Игроки {_name} и {opponent._name} обмениваются ударами!\n");
-                                _healpoints -= opponent._strength;
-                                opponent._healpoints -= separatedDamage;
+                                opponent._omen = 1; //метка для удаления объекта с отрицательными или нулевыми ОЗ из списка врагов
+                                partyDamage -= opponent._strength; //уменьшение общего урона на значение силы убитого
                             }
-                            if (_healpoints <= 0 && opponent._healpoints <= 0)
+                        }
+
+                        for (int j = 0; j < opponents.Count; j++)//Цикл для удаления метвых врагов из списка живых. Был частью следующего цикла, но там почему-то индекс выходил за рамки списка и поэтиому пришлось сделать два
+                        {
+                            if (opponents[j]._omen == 1)
                             {
-                                Console.WriteLine($"Игроки {_name} и {opponent._name} убили друг друга!\n");
-                                death(alive, dead);
-                                _killCharge++;
+                                opponents[j].death(alive);
+                            }
+                        }
+
+                        for (int i = 0; i < opponents.Count; i++) //Цикл для удаления мертвых из списка противников и присвоения очков за каждого мертвого врага
+                        {
+                            if (opponents[i]._omen == 1)
+                            {
+                                Console.WriteLine($"{opponents[i]._name} повержен.\n");
+                                opponents.Remove(opponents[i]);
                                 _killScore++;
+                                _killCharge++;
                                 _healCharge++;
-                                opponent.death(alive, dead);
-                                opponent._killCharge++;
-                                opponent._healCharge++;
-                                opponent._killScore++;
-                            }
-                            else
-                            {
-                                if (opponent._healpoints <= 0)
-                                {
-                                    Console.WriteLine($"Игрок {_name} убил игрока {opponent._name}!\n");
-                                    opponent.death(alive, dead);
-                                    _killCharge++;
-                                    _killScore++;
-                                    _healCharge++;
-                                }
-                                else
-                                {
-                                    if (_healpoints <= 0)
-                                    {
-                                        Console.WriteLine($"Игрок {opponent._name} убил игрока {_name}!\n");
-                                        death(alive, dead);
-                                        opponent._killCharge++;
-                                        opponent._killScore++;
-                                        opponent._healCharge++;
-                                    }
-
-                                }
-                            }
-
-                            if (opponent._healpoints <= 0)
-                            {
-                                opponent._omen = 1;
                             }
                         }
-                    }
 
-                    for (int i = 0; i < opponents.Count; i++)
+                        separatedDamage = _strength / opponents.Count; //Пересчет урона отряда
+                    }
+                    else
                     {
-                        if (opponents[i]._omen == 1)
-                        {
-                            opponents.Remove(opponents[i]);
-                        }
+                        death(alive);
                     }
-
                 }
 
-                Console.WriteLine("\nБитва окончена.");
+                Console.WriteLine("\nБитва окончена.\n");
 
-                if (dead.Contains(this) == true && opponents.Count == 0)
+                if (alive.Contains(this) == false && opponents.Count == 0)
                 {
                     Console.WriteLine("Все воины погибли.\n");
                 }
@@ -171,20 +164,26 @@ namespace GameCharacterTab
                 {
                     if (opponents.Count == 0)
                     {
-                        Console.WriteLine("\nОтряд противников повержен.\n");
+                        Console.WriteLine("Отряд противников повержен.\n");
                     }
                     else
                     {
-                        if (dead.Contains(this) == true)
+                        if (alive.Contains(this) == false)
                         {
-                            Console.WriteLine($"\nПерсонаж {_name} погиб.\n");
+                            Console.WriteLine($"Персонаж {_name} погиб.\n");
+                            foreach (var opponent in opponents) 
+                            {
+                                opponent._killScore++;
+                                opponent._killCharge++;
+                                opponent._healCharge++;
+                            }
                         }
                     }
                 }
             }
         }
 
-        private void win(List<Game> gamers, List<Game> alive, List<Game> dead) //Проверка условий завершения игры
+        private void win(List<Game> alive) //Проверка условий завершения игры
         {
             if (alive.Count(c => c._friend == true) == 0 && alive.Count(c => c._friend == false) == 0) //Если все члены обеих команд погибли
             {
@@ -206,37 +205,37 @@ namespace GameCharacterTab
             }
         }
 
-        private void win2(List<Game> gamers, List<Game> alive, List<Game> dead) //Объявление победы
+        private void win2(List<Game> gamers, List<Game> alive) //Объявление победы
         {
             switch (_end)
             {
                 case 1:
                     Console.WriteLine("Игра окончена.\nВсе погибли");
-                    statistics(gamers, alive, dead);
+                    statistics(gamers, alive);
                     break;
                 case 2:
                     Console.WriteLine("Игра окончена.\nПобедила команда 1");
-                    statistics(gamers, alive, dead);
+                    statistics(gamers, alive);
                     break;
                 case 3:
                     Console.WriteLine("Игра окончена.\nПобедила команда 2");
-                    statistics(gamers, alive, dead);
+                    statistics(gamers, alive);
                     break;
                 case 4:
                     Console.WriteLine("Игра окончена.");
-                    statistics(gamers, alive, dead);
+                    statistics(gamers, alive);
                     break;
             }
         }
 
-        private void ultimate(List<Game> opponents, List<Game> alive, List<Game> dead) //ульта
+        private void ultimate(List<Game> opponents, List<Game> alive) //ульта
         {
             Console.WriteLine("Использована ультимативная способность.\nПоверженные враги:");
             foreach (Game opponent in opponents)
             {
                 _killCharge -= 5;
                 opponent._healpoints = 0;
-                opponent.death(alive, dead);
+                opponent.death(alive);
                 Console.WriteLine(opponent._name);
                 _killScore++;
                 _healCharge++;
@@ -287,10 +286,9 @@ namespace GameCharacterTab
             }
         }
 
-        private void death(List<Game> alive, List<Game> dead) //Смерть персонажа
+        private void death(List<Game> alive) //Смерть персонажа
         {
             alive.Remove(this);
-            dead.Add(this);
         }
 
         private void moveX(int x)//перемещение по x
@@ -439,10 +437,8 @@ namespace GameCharacterTab
             }
         }
 
-        private void statistics(List<Game> gamers, List<Game> alive, List<Game> dead) //Вывод статистики в конце игры
+        private void statistics(List<Game> gamers, List<Game> alive) //Вывод статистики в конце игры
         {
-            //gamers.OrderByDescending(k => k._killScore);
-
             Console.WriteLine("\nКоманда 1:");
             int i = 1;
             foreach (Game gamer in gamers)
@@ -462,6 +458,7 @@ namespace GameCharacterTab
                     i++;
                 }
             }
+
             Console.WriteLine("\nКоманда 2:");
             i = 1;
             foreach (Game gamer in gamers)
@@ -483,7 +480,7 @@ namespace GameCharacterTab
             }
         }
 
-        public void GAME(List<Game> gamers, List<Game> alive, List<Game> dead) //Общий метод
+        public void GAME(List<Game> gamers, List<Game> alive) //Общий метод
         {
             Console.WriteLine("Добро пожаловать в Игру.\nПРАВИЛА:\nУничтожьте всех членов вражеской команды до того, как они уничтожат вас. Поддерживайте союзников лечением, группируйтесь в отряды и устраивайте засады.\nПолное исцеление: 3 очка;\nУльтимативная способность: 5 очков.");
             teamBuild(gamers, alive, true); //Создание персонажей 1 команды
@@ -524,7 +521,7 @@ namespace GameCharacterTab
 
                         while (continuation == "")
                         {
-                            if (alive.Contains(gamers[Convert.ToInt32(numb) - 1]) == true)
+                            if (alive.Contains(gamers[Convert.ToInt32(numb) - 1]) == true) //если жив то можно играть
                             {
                                 Console.WriteLine(" Вывод информации - 1\n Передвижение - 2\n Исцеление союзника - 3\n Полное исцеление союзника - 4\n Досрочное завершение игры - 5\n");
                                 string choise = Console.ReadLine();
@@ -552,9 +549,9 @@ namespace GameCharacterTab
                                                 }
                                             }
 
-                                            gamers[Convert.ToInt32(numb) - 1].battle(opponents, alive, dead);
+                                            gamers[Convert.ToInt32(numb) - 1].battle(opponents, alive);
                                             opponents.Clear();
-                                            gamers[Convert.ToInt32(numb) - 1].win(gamers, alive, dead);
+                                            gamers[Convert.ToInt32(numb) - 1].win(alive);
                                         }
                                         else
                                         {
@@ -606,16 +603,14 @@ namespace GameCharacterTab
                                 continuation = Console.ReadLine();
                                 answ = "";
                             }
-
                         }
                         if (gamers[Convert.ToInt32(numb) - 1]._end != 0)
                         {
-                            gamers[Convert.ToInt32(numb) - 1].win2(gamers, alive, dead);
+                            gamers[Convert.ToInt32(numb) - 1].win2(gamers, alive);
                             answ = "нет";
                             numb = " ";
                             break;
                         }
-
                     }
                     else
                     {

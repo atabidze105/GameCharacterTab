@@ -6,9 +6,8 @@ class Program
     {
         List<Game> characters = new();
         List<Game> alive = new();
-        List<Game> dead = new();
 
-        Game idle = new();
-        idle.GAME(characters, alive, dead);
+        Game idle = new(); //пустой объект для применения общего метода
+        idle.GAME(characters, alive);
     }
 }
