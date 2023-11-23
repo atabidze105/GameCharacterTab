@@ -18,7 +18,7 @@ namespace GameCharacterTab
         private int _omen; //метка для удаления объектов из списка врагов
         private int _end; //метка для завершения игры
 
-        public void newCharacter(string name, int locX, int locY, bool? friend, int health) //Создание персонажа
+        private void newCharacter(string name, int locX, int locY, bool? friend, int health) //Создание персонажа
         {
             _name = name;
             _locationX = locX;
@@ -325,7 +325,7 @@ namespace GameCharacterTab
             return null;
         }
 
-        public void charCreation(List<Game> gamers, List<Game> alive, bool team) //Создание персонажа
+        private void charCreation(List<Game> gamers, List<Game> alive, bool team) //Создание персонажа
         {
             while (_name == "" || _friend == null || _locationX == null || _locationY == null || _maxHP <= 0)
             {
