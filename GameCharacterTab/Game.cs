@@ -146,7 +146,7 @@ namespace GameCharacterTab
                             }
                         }
 
-                        separatedDamage = _strength / opponents.Count; //Пересчет урона отряда
+                        separatedDamage = opponents.Count > 0 ? _strength / opponents.Count : separatedDamage; //Пересчет урона отряда (если протиивников больше 0)
                     }
                     else
                     {
