@@ -8,6 +8,6 @@ class Program
         List<Game> alive = new();
 
         Game idle = new(); //пустой объект для применения общего метода
-        idle.GAME(characters, alive);
+        idle.Playing(characters, alive);
     }
 }

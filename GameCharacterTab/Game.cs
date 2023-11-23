@@ -480,7 +480,12 @@ namespace GameCharacterTab
             }
         }
 
-        public void GAME(List<Game> gamers, List<Game> alive) //Общий метод
+        public void Playing(List<Game> gamers, List<Game> alive) //Метод для вызова общего метода
+        {
+            GAME(gamers, alive);
+        }
+
+        private void GAME(List<Game> gamers, List<Game> alive) //Общий метод
         {
             Console.WriteLine("Добро пожаловать в Игру.\nПРАВИЛА:\nУничтожьте всех членов вражеской команды до того, как они уничтожат вас. Поддерживайте союзников лечением, группируйтесь в отряды и устраивайте засады.\nПолное исцеление: 3 очка;\nУльтимативная способность: 5 очков.");
             teamBuild(gamers, alive, true); //Создание персонажей 1 команды
