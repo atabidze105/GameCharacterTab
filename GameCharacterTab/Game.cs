@@ -29,7 +29,7 @@ namespace GameCharacterTab
             _healCharge = 0;
             _omen = 0;
             Random random = new Random();
-            _strength = random.Next(_maxHP / 2, _maxHP);
+            _strength = _maxHP /*random.Next(_maxHP / 2, _maxHP)*/;
             Console.WriteLine("\nСоздание персонажа завершено.\n");
         }
 
@@ -112,46 +112,42 @@ namespace GameCharacterTab
 
                     _healpoints -= partyDamage; //Враги первыми наносят урон
 
-                    if (_healpoints > 0) //Если после удара у игрока еще остались ОЗ, то игрок наносит урон всему отряду противников
+                    Console.WriteLine($"{_name} наносит ответный удар!\n");
+
+                    foreach (Game opponent in opponents) //Мы бьем каждого из списка врагов
                     {
-                        Console.WriteLine($"{_name} наносит ответный удар!\n");
-
-                        foreach (Game opponent in opponents) //Мы бьем каждого из списка врагов
+                        opponent._healpoints -= separatedDamage;
+                        if (opponent._healpoints <= 0) //проверка на наличие мертвых врагов
                         {
-                            opponent._healpoints -= separatedDamage;
-                            if (opponent._healpoints <= 0) //проверка на наличие мертвых врагов
-                            {
-                                opponent._omen = 1; //метка для удаления объекта с отрицательными или нулевыми ОЗ из списка врагов
-                                partyDamage -= opponent._strength; //уменьшение общего урона на значение силы убитого
-                            }
+                            opponent._omen = 1; //метка для удаления объекта с отрицательными или нулевыми ОЗ из списка врагов
+                            partyDamage -= opponent._strength; //уменьшение общего урона на значение силы убитого
                         }
-
-                        for (int j = 0; j < opponents.Count; j++)//Цикл для удаления метвых врагов из списка живых. Был частью следующего цикла, но там почему-то индекс выходил за рамки списка и поэтиому пришлось сделать два
-                        {
-                            if (opponents[j]._omen == 1)
-                            {
-                                opponents[j].death(alive);
-                            }
-                        }
-
-                        for (int i = 0; i < opponents.Count; i++) //Цикл для удаления мертвых из списка противников и присвоения очков за каждого мертвого врага
-                        {
-                            if (opponents[i]._omen == 1)
-                            {
-                                Console.WriteLine($"{opponents[i]._name} повержен.\n");
-                                opponents.Remove(opponents[i]);
-                                _killScore++;
-                                _killCharge++;
-                                _healCharge++;
-                            }
-                        }
-
-                        separatedDamage = opponents.Count > 0 ? _strength / opponents.Count : separatedDamage; //Пересчет урона отряда (если протиивников больше 0)
                     }
-                    else
+
+                    if (_healpoints <= 0) //Если мы получили фатальный урон, то всем противникам дают очки, а нас убивает
                     {
                         death(alive);
+                        foreach (var opponent in opponents)
+                        {
+                            opponent._killScore++;
+                            opponent._killCharge++;
+                            opponent._healCharge++;
+                        }
                     }
+
+                    foreach (Game opponent in alive) //перебираеьтся сприсок живых, противники с меткой удаляются, а ам за это дают очки
+                    {
+                        if (opponent._omen == 1)
+                        {
+                            Console.WriteLine($"{opponent._name} повержен.\n");
+                            opponents.Remove(opponent);
+                            _killScore++;
+                            _killCharge++;
+                            _healCharge++;
+                        }
+                    }
+
+                    separatedDamage = opponents.Count > 0 ? _strength / opponents.Count : separatedDamage; //Пересчет урона отряда (если протиивников больше 0)
                 }
 
                 Console.WriteLine("\nБитва окончена.\n");
@@ -542,7 +538,7 @@ namespace GameCharacterTab
                                         int Ymove = Convert.ToInt32(Console.ReadLine());
                                         gamers[Convert.ToInt32(numb) - 1].moveX(Xmove);
                                         gamers[Convert.ToInt32(numb) - 1].moveY(Ymove);
-                                        if (gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY) != null && gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY) != this && gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY)._friend != _friend)
+                                        if (gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY) != null && gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY) != this && gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY)._friend != gamers[Convert.ToInt32(numb) - 1]._friend)
                                         {
                                             List<Game> opponents = new();
 
@@ -555,7 +551,15 @@ namespace GameCharacterTab
                                             }
 
                                             gamers[Convert.ToInt32(numb) - 1].battle(opponents, alive);
-                                            opponents.Clear();
+
+                                            for (int i = 0; i < gamers.Count; i++) //дополнительная проверка на наличие метки для удаления из списка живых
+                                            {
+                                                if (gamers[i]._omen == 1 || gamers[i]._healpoints <= 0)
+                                                {
+                                                    gamers[i].death(alive);
+                                                }
+                                            }
+
                                             gamers[Convert.ToInt32(numb) - 1].win(alive);
                                         }
                                         else
