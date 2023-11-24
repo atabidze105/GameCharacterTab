@@ -29,7 +29,7 @@ namespace GameCharacterTab
             _healCharge = 0;
             _omen = 0;
             Random random = new Random();
-            _strength = _maxHP /*random.Next(_maxHP / 2, _maxHP)*/;
+            _strength = random.Next(_maxHP / 2, _maxHP);
             Console.WriteLine("\nСоздание персонажа завершено.\n");
         }
 
