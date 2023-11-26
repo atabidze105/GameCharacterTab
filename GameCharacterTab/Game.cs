@@ -28,8 +28,8 @@ namespace GameCharacterTab
             _killCharge = 0;
             _healCharge = 0;
             _omen = 0;
-            Random random = new Random();
-            _strength = random.Next(_maxHP / 2, _maxHP);
+            Random random = new();
+            _strength = _maxHP /*random.Next(_maxHP / 2, _maxHP)*/;
             Console.WriteLine("\nСоздание персонажа завершено.\n");
         }
 
@@ -94,7 +94,7 @@ namespace GameCharacterTab
                     }
                 }
             }
-            
+
             if (answer == "нет" || answer == "")
             {
                 Console.WriteLine("\nБитва начинается!\n");
@@ -107,7 +107,7 @@ namespace GameCharacterTab
                     }
                     else
                     {
-                        Console.WriteLine($"{opponents[0]._name} наносит удар!\n");                        
+                        Console.WriteLine($"{opponents[0]._name} наносит удар!\n");
                     }
 
                     _healpoints -= partyDamage; //Враги первыми наносят урон
@@ -129,9 +129,12 @@ namespace GameCharacterTab
                         death(alive);
                         foreach (var opponent in opponents)
                         {
-                            opponent._killScore++;
-                            opponent._killCharge++;
-                            opponent._healCharge++;
+                            if (opponent._omen == 0)
+                            {
+                                opponent._killScore++;
+                                opponent._killCharge++;
+                                opponent._healCharge++;
+                            }
                         }
                     }
 
@@ -167,7 +170,7 @@ namespace GameCharacterTab
                         if (alive.Contains(this) == false)
                         {
                             Console.WriteLine($"Персонаж {_name} погиб.\n");
-                            foreach (var opponent in opponents) 
+                            foreach (var opponent in opponents)
                             {
                                 opponent._killScore++;
                                 opponent._killCharge++;
@@ -373,7 +376,7 @@ namespace GameCharacterTab
         private void teamBuild(List<Game> characters, List<Game> alive, bool team) //Применение метода создания персонажей 
         {
             Console.Write("\nСоздайте игроков для ");
-            if (team == true) 
+            if (team == true)
             {
                 Console.Write("первой команды\n");
             }
@@ -503,14 +506,14 @@ namespace GameCharacterTab
                             numb = "";
                             break;
                         case "нет":
-                            numb = " "; 
+                            numb = " ";
                             break;
                         default:
                             answ = "";
                             break;
                     }
                 }
-                
+
                 while (numb == "")
                 {
                     Console.WriteLine("\nВведите номер персонажа:\n");
@@ -550,17 +553,24 @@ namespace GameCharacterTab
                                                 }
                                             }
 
-                                            gamers[Convert.ToInt32(numb) - 1].battle(opponents, alive);
-
-                                            for (int i = 0; i < gamers.Count; i++) //дополнительная проверка на наличие метки для удаления из списка живых
+                                            if (opponents.Count() > 0)
                                             {
-                                                if (gamers[i]._omen == 1 || gamers[i]._healpoints <= 0)
-                                                {
-                                                    gamers[i].death(alive);
-                                                }
-                                            }
+                                                gamers[Convert.ToInt32(numb) - 1].battle(opponents, alive);
 
-                                            gamers[Convert.ToInt32(numb) - 1].win(alive);
+                                                for (int i = 0; i < gamers.Count; i++) //дополнительная проверка на наличие метки для удаления из списка живых
+                                                {
+                                                    if (gamers[i]._omen == 1 || gamers[i]._healpoints <= 0)
+                                                    {
+                                                        gamers[i].death(alive);
+                                                    }
+                                                }
+
+                                                gamers[Convert.ToInt32(numb) - 1].win(alive); //проверка условий окончания игры
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("\nНет врагов поблизости.\n");
+                                            }
                                         }
                                         else
                                         {
