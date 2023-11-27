@@ -139,15 +139,13 @@ namespace GameCharacterTab
                                 opponent._healCharge++;
                             }
                         }
-
                     }
 
-                    foreach (Game opponent in alive) //перебираеьтся сприсок живых, противники с меткой удаляются, а ам за это дают очки
+                    foreach (Game opponent in alive) //перебираеьтся сприсок живых, противники с меткой удаляются, а им за это дают очки
                     {
                         if (opponent._omen == 1)
                         {
                             Console.WriteLine($"{opponent._name} повержен.\n{_name} получает очки.\n");
-                            opponent._omen = 0;
                             opponents.Remove(opponent);
                             _killScore++;
                             _killCharge++;
@@ -163,6 +161,16 @@ namespace GameCharacterTab
                 if (alive.Contains(this) == false && opponents.Count == 0)
                 {
                     Console.WriteLine("Все воины погибли.\n");
+                    foreach (var opponent in alive)
+                    {
+                        if (opponent._omen == 1)
+                        {
+                            opponent._killScore++;
+                            opponent._killCharge++;
+                            opponent._healCharge++;
+                            opponent._omen = 0;
+                        }
+                    }
                 }
                 else
                 {
