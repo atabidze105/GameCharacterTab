@@ -29,7 +29,7 @@ namespace GameCharacterTab
             _healCharge = 0;
             _omen = 0;
             Random random = new();
-            _strength = _maxHP /*random.Next(_maxHP / 2, _maxHP)*/;
+            _strength = random.Next(_maxHP / 2, _maxHP);
             Console.WriteLine("\nСоздание персонажа завершено.\n");
         }
 
@@ -60,7 +60,7 @@ namespace GameCharacterTab
                     Console.WriteLine($"{opponent._name}");
                     partyDamage += opponent._strength; //общий урон отряда противников
                 }
-
+                Console.WriteLine($"\nСила отряда: {partyDamage}.");
             }
             else
             {
@@ -68,6 +68,7 @@ namespace GameCharacterTab
                 foreach (Game opponent in opponents)
                 {
                     partyDamage += opponent._strength; //общий урон отряда противников
+                    Console.WriteLine($"\nСила: {partyDamage}.");
                 }
             }
 
@@ -103,16 +104,16 @@ namespace GameCharacterTab
                 {
                     if (opponents.Count > 1) //Если враг был или остается один, то выводится его имя. Иначе пишет что нас бьет отряд
                     {
-                        Console.WriteLine("Отряд врагов наносит удар!\n");
+                        Console.WriteLine($"Отряд из {opponents.Count} врагов наносит удар!\n{_name} получает {partyDamage} ед. урона!\n");
                     }
                     else
                     {
-                        Console.WriteLine($"{opponents[0]._name} наносит удар!\n");
+                        Console.WriteLine($"{opponents[0]._name} наносит удар!\n{_name} получает {partyDamage} ед. урона!\n");
                     }
 
                     _healpoints -= partyDamage; //Враги первыми наносят урон
 
-                    Console.WriteLine($"{_name} наносит ответный удар!\n");
+                    Console.WriteLine($"{_name} наносит ответный удар в размере {separatedDamage} ед. урона!\n");
 
                     foreach (Game opponent in opponents) //Мы бьем каждого из списка врагов
                     {
@@ -121,6 +122,7 @@ namespace GameCharacterTab
                         {
                             opponent._omen = 1; //метка для удаления объекта с отрицательными или нулевыми ОЗ из списка врагов
                             partyDamage -= opponent._strength; //уменьшение общего урона на значение силы убитого
+                            Console.WriteLine($"Сила отряда упала на {opponent._strength} ед. урона!\n");
                         }
                     }
 
@@ -131,18 +133,21 @@ namespace GameCharacterTab
                         {
                             if (opponent._omen == 0)
                             {
+                                Console.WriteLine($"{opponent._name} получает очки.");
                                 opponent._killScore++;
                                 opponent._killCharge++;
                                 opponent._healCharge++;
                             }
                         }
+
                     }
 
                     foreach (Game opponent in alive) //перебираеьтся сприсок живых, противники с меткой удаляются, а ам за это дают очки
                     {
                         if (opponent._omen == 1)
                         {
-                            Console.WriteLine($"{opponent._name} повержен.\n");
+                            Console.WriteLine($"{opponent._name} повержен.\n{_name} получает очки.\n");
+                            opponent._omen = 0;
                             opponents.Remove(opponent);
                             _killScore++;
                             _killCharge++;
@@ -170,12 +175,6 @@ namespace GameCharacterTab
                         if (alive.Contains(this) == false)
                         {
                             Console.WriteLine($"Персонаж {_name} погиб.\n");
-                            foreach (var opponent in opponents)
-                            {
-                                opponent._killScore++;
-                                opponent._killCharge++;
-                                opponent._healCharge++;
-                            }
                         }
                     }
                 }
@@ -300,11 +299,11 @@ namespace GameCharacterTab
             _locationY = y;
         }
 
-        private Game searchingByXY(List<Game> characters, int X, int Y) //Поиск персонажа по его местоположению
+        private Game searchingByXY(List<Game> characters, int X, int Y, List<Game> alive) //Поиск персонажа по его местоположению
         {
             foreach (Game gamer in characters) //Перебор объектов в массиве
             {
-                if (gamer._locationX == X && gamer._locationY == Y && gamer != this) //Проверка элементов массива на соответствие искомомым координатам
+                if (gamer._locationX == X && gamer._locationY == Y && gamer != this && alive.Contains(gamer) == true) //Проверка элементов массива на соответствие искомомым координатам
                 {
                     return gamer; //Возврат искомого элемента массива
                 }
@@ -352,9 +351,9 @@ namespace GameCharacterTab
                 }
                 else
                 {
-                    if (searchingByXY(gamers, XChar, YChar) != null)
+                    if (searchingByXY(gamers, XChar, YChar, alive) != null)
                     {
-                        if (searchingByXY(gamers, XChar, YChar)._friend != team) //Не позволяет разместить персонажа там, где враги
+                        if (searchingByXY(gamers, XChar, YChar, alive)._friend != team) //Не позволяет разместить персонажа там, где враги
                         {
                             Console.WriteLine("Введенные координаты занял враг. Разместите своего персонажа в другом месте.\n");
                         }
@@ -415,7 +414,7 @@ namespace GameCharacterTab
             int i = 1;
             foreach (Game gamer in characters)
             {
-                Console.Write($"{i}. {gamer._name} - ");
+                Console.Write($"{i}. {gamer._name} - ОЗ: {gamer._healpoints}/{gamer._maxHP} - сила: {gamer._strength} - убито: {gamer._killScore} - ");
                 if (gamer._friend == true)
                 {
                     Console.Write("команда 1");
@@ -541,7 +540,7 @@ namespace GameCharacterTab
                                         int Ymove = Convert.ToInt32(Console.ReadLine());
                                         gamers[Convert.ToInt32(numb) - 1].moveX(Xmove);
                                         gamers[Convert.ToInt32(numb) - 1].moveY(Ymove);
-                                        if (gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY) != null && gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY) != this && gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY)._friend != gamers[Convert.ToInt32(numb) - 1]._friend)
+                                        if (gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY, alive) != null && gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY, alive) != this && gamers[Convert.ToInt32(numb) - 1].searchingByXY(gamers, gamers[Convert.ToInt32(numb) - 1]._locationX, gamers[Convert.ToInt32(numb) - 1]._locationY, alive)._friend != gamers[Convert.ToInt32(numb) - 1]._friend)
                                         {
                                             List<Game> opponents = new();
 
